@@ -1,0 +1,6 @@
+pyproject.toml
+python_data_analysis.egg-info/PKG-INFO
+python_data_analysis.egg-info/SOURCES.txt
+python_data_analysis.egg-info/dependency_links.txt
+python_data_analysis.egg-info/requires.txt
+python_data_analysis.egg-info/top_level.txt

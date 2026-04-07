@@ -1,10 +1,11 @@
-[build-system]
-requires = ["hatchling >= 1.26"]
-build-backend = "hatchling.build"
-
 [project]
-name="python-data-analysis"
-dynamic = ["version"]
+name = "python-data-analysis"
+version = "0.1.0"
+requires-python = ">=3.13"
 dependencies = [
-    "pandas","numpy", "scipy", "matplotlib", "jupyterlab"
+    "pandas",
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "jupyterlab",
 ]
