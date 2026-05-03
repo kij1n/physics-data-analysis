@@ -15,7 +15,7 @@ def get_gamma(L_d: float, A: np.ndarray, L: np.ndarray, g: float) -> tuple[float
         denominator = (omega_0_i**2 - omega_d**2)**2 + (gamma * omega_d)**2
         return np.sqrt(numerator / denominator)
 
-    popt, pcov = curve_fit(resonance_norm, omega_0, A_norm, p0=[0.5])
+    popt, pcov = curve_fit(resonance_norm, omega_0, A_norm, p0=[0.5], bounds=(0, np.inf))
     gamma_fit = popt[0]
     gamma_err = np.sqrt(pcov[0, 0])
 
