@@ -189,6 +189,7 @@ def resonance_norm(omega_d, omega_i, omega_i_max_A, gamma):
 
 def plot_all(p_data: PendulumsData, cols: list[str] = None, color_override: list[str] = None):
     colors = color_override if color_override is not None else Constants.COLORS
+    cols = cols if cols is not None else p_data.cols
 
     for col, color in zip(cols, colors):
         plt.plot(
@@ -210,38 +211,16 @@ def plot_each(p_data: PendulumsData):
 
     opacity = 1
 
-    axd["A"].plot(
-        p_data.data["t"],
-        p_data.data["mass A"],
-        color="blue",
-        label="97cm",
-        alpha=opacity,
-    )
-    axd["A"].set_title("97cm")
-    axd["B"].plot(
-        p_data.data["t"],
-        p_data.data["mass B"],
-        color="orange",
-        label="99cm",
-        alpha=opacity,
-    )
-    axd["B"].set_title("99cm")
-    axd["C"].plot(
-        p_data.data["t"],
-        p_data.data["mass C"],
-        color="green",
-        label="99.5cm",
-        alpha=opacity,
-    )
-    axd["C"].set_title("99.5cm")
-    axd["D"].plot(
-        p_data.data["t"],
-        p_data.data["mass D"],
-        color="black",
-        label="100cm",
-        alpha=opacity,
-    )
-    axd["D"].set_title("100cm")
+    for col, color, label in zip(p_data.cols, Constants.COLORS, p_data.labels):
+        key = col[-1]
+        axd[key].plot(
+            p_data.data["t"],
+            p_data.data[col],
+            color=color,
+            label=label,
+            alpha=opacity,
+        )
+        axd[key].set_title(label)
 
     axd["A"].set_ylabel("Amplitude")
     axd["C"].set_ylabel("Amplitude")
