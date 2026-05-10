@@ -3,6 +3,7 @@ import numpy as np
 from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
+from dataclasses import dataclass
 
 
 class Constants:
@@ -10,19 +11,20 @@ class Constants:
     COLORS = ["blue", "green", "red", "orange"]
 
 
+@dataclass
 class PendulumsData:
-    def __init__(
-        self,
-        cols: list[str],
-        labels: list[str],
-        lengths: np.ndarray,
-        data: pd.DataFrame,
-    ):
-        self.cols = cols
-        self.labels = labels
-        self.lengths = lengths
-        self.data = data
+    cols: list[str]
+    labels: list[str]
+    lengths: np.ndarray
+    data: pd.DataFrame  
 
+    def drop_cols(self, cols_to_drop: list[str]):
+        self.data = self.data.drop(columns=cols_to_drop)
+        for col in cols_to_drop:
+            index = self.cols.index(col)
+            self.cols.pop(index)
+            self.labels.pop(index)
+            self.lengths = np.delete(self.lengths, index)
 
 class EnvelopeData:
     def __init__(self, cols: list[str], labels: list[str], data: pd.DataFrame):
@@ -102,7 +104,7 @@ class ResonanceFitData:
         self.gamma = None
         self.gamma_err = None
 
-    def calc_gamma(self) -> None:
+    def fit(self) -> None:
         def resonance_norm(omega_0_i, gamma):
             numerator = (self.omega_0_max**2 - self.omega_d**2) ** 2 + (
                 gamma * self.omega_d
@@ -111,6 +113,8 @@ class ResonanceFitData:
                 gamma * self.omega_d
             ) ** 2
             return np.sqrt(numerator / denominator)
+        
+        print(self.A)
 
         popt, pcov = curve_fit(
             resonance_norm, self.omega_0, self.A_norm, p0=[0.5], bounds=(0, np.inf)
@@ -183,27 +187,18 @@ def resonance_norm(omega_d, omega_i, omega_i_max_A, gamma):
     return np.sqrt(numerator / denominator)
 
 
-def plot_all(p_data: PendulumsData):
-    plt.plot(
-        p_data.data["t"],
-        p_data.data["mass D"],
-        color="black",
-        label="100cm",
-        alpha=0.99,
-    )
-    plt.plot(
-        p_data.data["t"], p_data.data["mass A"], color="blue", label="97cm", alpha=0.9
-    )
-    plt.plot(
-        p_data.data["t"], p_data.data["mass B"], color="orange", label="99cm", alpha=0.9
-    )
-    plt.plot(
-        p_data.data["t"],
-        p_data.data["mass C"],
-        color="green",
-        label="99.5cm",
-        alpha=0.8,
-    )
+def plot_all(p_data: PendulumsData, cols: list[str] = None, color_override: list[str] = None):
+    colors = color_override if color_override is not None else Constants.COLORS
+
+    for col, color in zip(cols, colors):
+        plt.plot(
+            p_data.data["t"],
+            p_data.data[col],
+            color=color,
+            label=p_data.labels[p_data.cols.index(col)],
+            alpha=0.9,
+        )
+
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude")
     plt.title("Amplitude vs Time")
