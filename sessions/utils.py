@@ -113,8 +113,7 @@ class ResonanceFitData:
                 gamma * self.omega_d
             ) ** 2
             return np.sqrt(numerator / denominator)
-        
-        print(self.A)
+
 
         popt, pcov = curve_fit(
             resonance_norm, self.omega_0, self.A_norm, p0=[0.5], bounds=(0, np.inf)
