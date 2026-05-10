@@ -3,3 +3,4 @@
 __pycache__/
 .vscode/
 python-*.egg-info/
+.claude/
