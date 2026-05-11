@@ -16,7 +16,7 @@ class PendulumsData:
     cols: list[str]
     labels: list[str]
     lengths: np.ndarray
-    data: pd.DataFrame  
+    data: pd.DataFrame
 
     def drop_cols(self, cols_to_drop: list[str]):
         self.data = self.data.drop(columns=cols_to_drop)
@@ -25,6 +25,7 @@ class PendulumsData:
             self.cols.pop(index)
             self.labels.pop(index)
             self.lengths = np.delete(self.lengths, index)
+
 
 class EnvelopeData:
     def __init__(self, cols: list[str], labels: list[str], data: pd.DataFrame):
@@ -114,7 +115,6 @@ class ResonanceFitData:
             ) ** 2
             return np.sqrt(numerator / denominator)
 
-
         popt, pcov = curve_fit(
             resonance_norm, self.omega_0, self.A_norm, p0=[0.5], bounds=(0, np.inf)
         )
@@ -186,7 +186,9 @@ def resonance_norm(omega_d, omega_i, omega_i_max_A, gamma):
     return np.sqrt(numerator / denominator)
 
 
-def plot_all(p_data: PendulumsData, cols: list[str] = None, color_override: list[str] = None):
+def plot_all(
+    p_data: PendulumsData, cols: list[str] = None, color_override: list[str] = None
+):
     colors = color_override if color_override is not None else Constants.COLORS
     cols = cols if cols is not None else p_data.cols
 
