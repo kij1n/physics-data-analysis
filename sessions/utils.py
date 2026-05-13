@@ -124,7 +124,7 @@ class ResonanceFitData:
         self.gamma = gamma_fit
         self.gamma_err = gamma_err
 
-    def plot_detected_peaks(self):
+    def plot_detected_peaks(self, title: str = None):
         col_names = ["A", "B", "C", "D"]
         fix, axd = plt.subplot_mosaic(
             [col_names[0:2], col_names[2:4]], sharex=True, sharey=True
@@ -151,7 +151,7 @@ class ResonanceFitData:
         axd["C"].set_xlabel("Time (s)")
         axd["D"].set_xlabel("Time (s)")
 
-        plt.suptitle("Detected beat-envelope maxima")
+        plt.suptitle(title if title is not None else "Detected beat-envelope maxima")
         plt.tight_layout()
 
     def plot_resonance_curve(self, data_point_clr: str, fit_clr: str):
@@ -187,7 +187,10 @@ def resonance_norm(omega_d, omega_i, omega_i_max_A, gamma):
 
 
 def plot_all(
-    p_data: PendulumsData, cols: list[str] = None, color_override: list[str] = None
+    p_data: PendulumsData,
+    cols: list[str] = None,
+    color_override: list[str] = None,
+    title: str = None,
 ):
     colors = color_override if color_override is not None else Constants.COLORS
     cols = cols if cols is not None else p_data.cols
@@ -203,11 +206,11 @@ def plot_all(
 
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude")
-    plt.title("Amplitude vs Time")
+    plt.title(title if title is not None else "Amplitude vs Time")
     plt.legend()
 
 
-def plot_each(p_data: PendulumsData):
+def plot_each(p_data: PendulumsData, title: str = None):
     fig, axd = plt.subplot_mosaic([["A", "B"], ["C", "D"]], sharex=True, sharey=True)
 
     opacity = 1
@@ -228,14 +231,12 @@ def plot_each(p_data: PendulumsData):
     axd["C"].set_xlabel("Time (s)")
     axd["D"].set_xlabel("Time (s)")
 
-    plt.suptitle("Amplitude vs Time for Each Mass")
+    plt.suptitle(title if title is not None else "Amplitude vs Time for Each Mass")
     plt.tight_layout()
 
-    plt.suptitle("Amplitude vs Time for Each Mass")
 
-
-def add_resonance_plot_labels():
+def add_resonance_plot_labels(title: str = None):
     plt.xlabel("Natural Frequency ω₀ (rad/s)")
     plt.ylabel("Normalized Amplitude A/A_max")
-    plt.title("Resonance Curve")
+    plt.title(title if title is not None else "Resonance Curve")
     plt.legend()
