@@ -26,6 +26,10 @@ class PendulumsData:
             self.labels.pop(index)
             self.lengths = np.delete(self.lengths, index)
 
+    def drop_time_range(self, t_start: float, t_end: float):
+        mask = (self.data["t"] < t_start) | (self.data["t"] > t_end)
+        self.data = self.data[mask].reset_index(drop=True)
+
 
 class EnvelopeData:
     def __init__(self, cols: list[str], labels: list[str], data: pd.DataFrame):
