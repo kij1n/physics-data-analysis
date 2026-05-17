@@ -1,6 +1,4 @@
-#multi:
-,mass A,mass B,mass C,mass D,
-t,x,x,x,x,
+t,mass A,mass B,mass C,mass D
 0.000,-5.228E-3,5.228E-3,6.536E-4,1.961E-3
 0.033,,,,
 0.067,,,,
