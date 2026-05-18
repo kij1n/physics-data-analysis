@@ -208,6 +208,8 @@ def plot_all(
             alpha=0.9,
         )
 
+    plt.axhline(y=0, color='black', linestyle='--', linewidth=1)
+
     plt.xlabel("Time (s)")
     plt.ylabel("Amplitude")
     plt.title(title if title is not None else "Amplitude vs Time")
@@ -229,6 +231,7 @@ def plot_each(p_data: PendulumsData, title: str = None):
             alpha=opacity,
         )
         axd[key].set_title(label)
+        axd[key].axhline(y=0, color='black', linestyle='--', linewidth=1)
 
     axd["A"].set_ylabel("Amplitude")
     axd["C"].set_ylabel("Amplitude")
