@@ -30,6 +30,10 @@ class PendulumsData:
         mask = (self.data["t"] < t_start) | (self.data["t"] > t_end)
         self.data = self.data[mask].reset_index(drop=True)
 
+    def preprocess_offsets(self):
+        for col in self.cols:
+            self.data[col] -= self.data[col].median()
+
 
 class EnvelopeData:
     def __init__(self, cols: list[str], labels: list[str], data: pd.DataFrame):
