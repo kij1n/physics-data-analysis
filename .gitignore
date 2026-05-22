@@ -4,4 +4,5 @@ __pycache__/
 .vscode/
 python-*.egg-info/
 *.local*
-figures/.claude/
+figures/
+.claude/
