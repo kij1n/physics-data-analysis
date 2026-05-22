@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, detrend
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
+import os
+from pathlib import Path
 
 
 class Constants:
@@ -56,6 +58,10 @@ class PendulumsData:
         """
         for col in self.cols:
             self.data[col] -= self.data[col].median()
+
+    def detrend(self):
+        for col in self.cols:
+            self.data[col] = detrend(self.data[col], type="linear")
 
 
 class EnvelopeData:
@@ -367,3 +373,20 @@ def add_resonance_plot_labels(title: str = None) -> None:
     plt.ylabel("Normalized Amplitude A/A_max")
     plt.title(title if title is not None else "Resonance Curve")
     plt.legend()
+
+def save_plot(filename: str, dpi: int = 300) -> None:
+    """
+    Save the current plot to a file with the specified filename and resolution.
+    Args:
+        filename: The name of the file to save the plot to (including extension, e.g., 'plot.png').
+        dpi: The resolution in dots per inch for the saved plot. Default is 300.
+    """
+    path = Path(filename)
+    figure_dir = Path("../figures")
+    dir = path.parent 
+
+    if not os.path.exists(figure_dir / dir):
+        os.makedirs(figure_dir / dir)
+    
+    filename = os.path.join(figure_dir, filename)
+    plt.savefig(filename, dpi=dpi, bbox_inches="tight")
