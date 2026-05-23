@@ -193,6 +193,10 @@ class ResonanceFitData:
         self.single_pendulum_gamma: dict[str, tuple[float, float]] = {}
 
     def fit_single_pendulums(self) -> tuple[float, float]:
+        """
+        Fit the decay of the envelope peaks for each individual pendulum to extract the damping coefficient.
+        The values are stored in the instance variable `single_pendulum_gamma` as a dictionary mapping column names to tuples of (gamma, gamma_err).
+        """
         for col in self.envelope_data.cols:
             t_peaks = self.envelope_data.results[col][1]
             h_peaks_signed = self.envelope_data.results[col][2]
@@ -200,19 +204,25 @@ class ResonanceFitData:
 
             def decay(t, A_ss, A_nat, gamma):
                 return A_ss + A_nat * np.exp(-gamma * t / 2)
-            
+
             p0 = [
                 np.mean(abs_peaks[-4:]),
                 np.mean(abs_peaks[:4]) - np.mean(abs_peaks[-4:]),
-                0.05
+                0.05,
             ]
 
-            popt, pcov = curve_fit(decay, t_peaks, abs_peaks, p0=p0, bounds=([0, 0, 0], [1, 1, 1]), maxfev=10000)
+            popt, pcov = curve_fit(
+                decay,
+                t_peaks,
+                abs_peaks,
+                p0=p0,
+                bounds=([0, 0, 0], [1, 1, 1]),
+                maxfev=10000,
+            )
             A_ss, A_nat, gamma = popt
-            gamma_err = np.sqrt(pcov[2,2])
+            gamma_err = np.sqrt(pcov[2, 2])
 
             self.single_pendulum_gamma[col] = (gamma, gamma_err)
-
 
     def fit(self) -> None:
         """
@@ -408,10 +418,10 @@ def save_plot(filename: str, dpi: int = 300) -> None:
     """
     path = Path(filename)
     figure_dir = Path("../figures")
-    dir = path.parent 
+    dir = path.parent
 
     if not os.path.exists(figure_dir / dir):
         os.makedirs(figure_dir / dir)
-    
+
     filename = os.path.join(figure_dir, filename)
     plt.savefig(filename, dpi=dpi, bbox_inches="tight")
