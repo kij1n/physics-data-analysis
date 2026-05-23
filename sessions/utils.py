@@ -190,6 +190,30 @@ class ResonanceFitData:
         self.gamma: float | None = None
         self.gamma_err: float | None = None
 
+        self.single_pendulum_gamma: dict[str, tuple[float, float]] = {}
+
+    def fit_single_pendulums(self) -> tuple[float, float]:
+        for col in self.envelope_data.cols:
+            t_peaks = self.envelope_data.results[col][1]
+            h_peaks_signed = self.envelope_data.results[col][2]
+            abs_peaks = np.abs(h_peaks_signed)
+
+            def decay(t, A_ss, A_nat, gamma):
+                return A_ss + A_nat * np.exp(-gamma * t / 2)
+            
+            p0 = [
+                np.mean(abs_peaks[-4:]),
+                np.mean(abs_peaks[:4]) - np.mean(abs_peaks[-4:]),
+                0.05
+            ]
+
+            popt, pcov = curve_fit(decay, t_peaks, abs_peaks, p0=p0, bounds=([0, 0, 0], [1, 1, 1]), maxfev=10000)
+            A_ss, A_nat, gamma = popt
+            gamma_err = np.sqrt(pcov[2,2])
+
+            self.single_pendulum_gamma[col] = (gamma, gamma_err)
+
+
     def fit(self) -> None:
         """
         Fit the resonance curve to the normalized amplitude data to extract the damping coefficient.
@@ -373,6 +397,7 @@ def add_resonance_plot_labels(title: str = None) -> None:
     plt.ylabel("Normalized Amplitude A/A_max")
     plt.title(title if title is not None else "Resonance Curve")
     plt.legend()
+
 
 def save_plot(filename: str, dpi: int = 300) -> None:
     """
