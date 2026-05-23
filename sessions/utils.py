@@ -425,3 +425,35 @@ def save_plot(filename: str, dpi: int = 300) -> None:
 
     filename = os.path.join(figure_dir, filename)
     plt.savefig(filename, dpi=dpi, bbox_inches="tight")
+
+def bar_chart(data: tuple[list[str], list[float], list[float]], title: str = None) -> None:
+    """
+    Create a bar chart with error bars from the provided data.
+    Args:
+        data: A list of tuples, where each tuple contains (label, value, error).
+        title: Optional title for the plot. If None, a default title will be used.
+    """
+    labels, values, errors = data
+    
+    fig, ax = plt.subplots(figsize=(8,6))
+
+    bars = ax.bar(labels, values, yerr=errors, capsize=6, 
+              color='#4C72B0', edgecolor='black', alpha=0.8)
+
+    for i, bar in enumerate(bars):
+        height = bar.get_height()
+        error = errors[i]
+        
+        ax.text(
+            bar.get_x() + bar.get_width() / 2, height + error + 0.0005, 
+            f'{height:.4f}', 
+            ha='center', va='bottom', fontsize=10
+        )
+
+    ax.set_ylabel('Gamma Value')
+    ax.set_title('Baseline Gamma Values by Mass' if title is None else title)
+
+    ax.set_ylim(0, max(values) + max(errors) + 0.005)
+
+    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
