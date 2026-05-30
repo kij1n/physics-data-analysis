@@ -486,3 +486,57 @@ def bar_chart(data: tuple[list[str], list[float], list[float]], title: str = Non
 
     ax.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
+
+
+def bar_charts(
+    datasets: list[tuple[list[str], list[float], list[float]]],
+    titles: list[str] | None = None,
+) -> None:
+    """
+    Plot multiple bar charts with error bars in a mosaic layout.
+    Args:
+        datasets: List of (labels, values, errors) tuples, one per chart.
+        titles: Optional list of titles, one per chart. If None, no titles are set.
+    """
+    n = len(datasets)
+    cols = 2
+    rows = (n + cols - 1) // cols
+    keys = [chr(ord("A") + i) for i in range(n)]
+
+    grid = []
+    for r in range(rows):
+        row = []
+        for c in range(cols):
+            idx = r * cols + c
+            row.append(keys[idx] if idx < n else keys[n - 1])
+        grid.append(row)
+
+    _, axd = plt.subplot_mosaic(grid, figsize=(8 * cols, 6 * rows), sharey=True)
+
+    for i, (data, key) in enumerate(zip(datasets, keys)):
+        labels, values, errors = data
+        ax = axd[key]
+
+        bars = ax.bar(labels, values, yerr=errors, capsize=6,
+                      color='#4C72B0', edgecolor='black', alpha=0.8)
+
+        for j, bar in enumerate(bars):
+            height = bar.get_height()
+            ax.text(
+                bar.get_x() + bar.get_width() / 2, height + errors[j] + 0.0005,
+                f'{height:.4f}',
+                ha='center', va='bottom', fontsize=10,
+            )
+
+        if i % cols == 0:
+            ax.set_ylabel('Gamma Value')
+        else:
+            ax.tick_params(labelleft=False)
+
+        ax.set_ylim(0, max(values) + max(errors) + 0.005)
+        ax.grid(axis='y', linestyle='--', alpha=0.7)
+
+        if titles is not None:
+            ax.set_title(titles[i])
+
+    plt.tight_layout()
