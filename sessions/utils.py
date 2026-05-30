@@ -191,6 +191,17 @@ class ResonanceFitData:
         self.gamma_err: float | None = None
 
         self.single_pendulum_gamma: dict[str, tuple[float, float]] = {}
+    
+    def get_data_to_plot(self) -> tuple[list[str], list[float], list[float]]:
+        data_to_plot = ([], [], [])
+
+        for col in self.envelope_data.cols:
+            gamma, gamma_err = self.single_pendulum_gamma[col]
+            data_to_plot[0].append(col)
+            data_to_plot[1].append(gamma)
+            data_to_plot[2].append(gamma_err)   
+        
+        return data_to_plot
 
     def fit_single_pendulums(self) -> tuple[float, float]:
         """
@@ -336,6 +347,7 @@ def plot_all(
     cols: list[str] = None,
     color_override: list[str] = None,
     title: str = None,
+    t_range: tuple[int | float, int | float] | None = None,
 ) -> None:
     """
     Plot the time series data for all pendulums on a single graph, with options to specify which columns to plot and override colors.
@@ -344,14 +356,22 @@ def plot_all(
         cols: Optional list of column names to plot. If None, all columns in p_data will be plotted.
         color_override: Optional list of colors to use for the plots. If None, default colors from Constants.COLORS will be used.
         title: Optional title for the plot.
+        t_range: Optional (t_start, t_end) tuple to restrict the plotted time range (inclusive).
+            Use float('inf') or np.inf as t_end to plot from t_start to the end of the data.
     """
     colors = color_override if color_override is not None else Constants.COLORS
     cols = cols if cols is not None else p_data.cols
 
+    if t_range is not None:
+        mask = (p_data.data["t"] >= t_range[0]) & (p_data.data["t"] <= t_range[1])
+        df = p_data.data[mask]
+    else:
+        df = p_data.data
+
     for col, color in zip(cols, colors):
         plt.plot(
-            p_data.data["t"],
-            p_data.data[col],
+            df["t"],
+            df[col],
             color=color,
             label=p_data.labels[p_data.cols.index(col)],
             alpha=0.9,
@@ -365,22 +385,30 @@ def plot_all(
     plt.legend()
 
 
-def plot_each(p_data: PendulumsData, title: str = None) -> None:
+def plot_each(p_data: PendulumsData, title: str = None, t_range: tuple[int | float, int | float] | None = None) -> None:
     """
     Plot the time series data for each pendulum in separate subplots, sharing the same x and y axes.
     Args:
         p_data: An instance of PendulumsData containing the time series data and metadata.
         title: Optional title for the plot. If None, a default title will be used.
+        t_range: Optional (t_start, t_end) tuple to restrict the plotted time range (inclusive).
+            Use float('inf') or np.inf as t_end to plot from t_start to the end of the data.
     """
     fig, axd = plt.subplot_mosaic([["A", "B"], ["C", "D"]], sharex=True, sharey=True)
 
     opacity = 1
 
+    if t_range is not None:
+        mask = (p_data.data["t"] >= t_range[0]) & (p_data.data["t"] <= t_range[1])
+        df = p_data.data[mask]
+    else:
+        df = p_data.data
+
     for col, color, label in zip(p_data.cols, Constants.COLORS, p_data.labels):
         key = col[-1]
         axd[key].plot(
-            p_data.data["t"],
-            p_data.data[col],
+            df["t"],
+            df[col],
             color=color,
             label=label,
             alpha=opacity,
@@ -425,6 +453,7 @@ def save_plot(filename: str, dpi: int = 300) -> None:
 
     filename = os.path.join(figure_dir, filename)
     plt.savefig(filename, dpi=dpi, bbox_inches="tight")
+
 
 def bar_chart(data: tuple[list[str], list[float], list[float]], title: str = None) -> None:
     """
