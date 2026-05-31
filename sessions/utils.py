@@ -3,6 +3,7 @@ import numpy as np
 from scipy.signal import find_peaks, detrend
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -191,6 +192,18 @@ class ResonanceFitData:
         self.gamma_err: float | None = None
 
         self.single_pendulum_gamma: dict[str, tuple[float, float]] = {}
+
+    def get_single_gamma_avg(self) -> float:
+        """
+        Get the average gamma value across all individual pendulum fits.
+        Returns:
+            The average gamma value calculated from the individual pendulum fits.
+        """
+        if not self.single_pendulum_gamma:
+            raise ValueError("No single pendulum gamma values found. Please run fit_single_pendulums() first.")
+        
+        gammas = [gamma for gamma, _ in self.single_pendulum_gamma.values()]
+        return float(np.mean(gammas))
     
     def get_data_to_plot(self) -> tuple[list[str], list[float], list[float]]:
         data_to_plot = ([], [], [])
@@ -453,6 +466,84 @@ def save_plot(filename: str, dpi: int = 300) -> None:
 
     filename = os.path.join(figure_dir, filename)
     plt.savefig(filename, dpi=dpi, bbox_inches="tight")
+
+
+def plot_transient_decay(
+    gammas: float | list[float],
+    plot_range: tuple[float, float],
+    measurement_range: tuple[float, float],
+    labels: list[str] | None = None,
+    colors: list[str] | None = None,
+    threshold_pct: float = 5.0,
+    title: str | None = None,
+    round_digits: int = 2,
+) -> None:
+    """
+    Plot the decay of the natural transient amplitude for one or more damping
+    coefficients, expressed as a percentage of its initial value.
+
+    The underlying model is A = A_ss + A_nat * exp(-gamma * t / 2), but only the
+    natural transient term A_nat is of interest here, so each curve is normalized
+    to start at 100% at t = 0 and follows 100 * exp(-gamma * t / 2). The gamma
+    values are per-second (as produced by the envelope/resonance fits), while the
+    x-axis is in minutes, so time is converted internally.
+
+    Args:
+        gammas: A single damping coefficient or a list of them (per second) to plot.
+        plot_range: (t_start, t_end) range of the x-axis, in minutes. Both bounds
+            must be finite.
+        measurement_range: (t_start, t_end) of the grayed measurement window, in minutes.
+        labels: Optional labels for each gamma curve. If None, labels are derived
+            from the gamma values.
+        colors: Optional list of colors for the curves. If None, Constants.COLORS is used.
+        threshold_pct: Percentage at which the transient is considered to be in
+            steady state, drawn as a horizontal dashed line. Default is 5.0.
+        title: Optional title for the plot. If None, a default title is used.
+    """
+
+    def decay(t_min: np.ndarray, gamma: float) -> np.ndarray:
+        """Natural transient amplitude as a % of its initial value (t in minutes)."""
+        t_seconds = t_min * 60.0
+        return 100.0 * np.exp(-gamma * t_seconds / 2.0)
+
+    if np.isscalar(gammas):
+        gammas = [gammas]
+
+    colors = colors if colors is not None else Constants.COLORS
+    t = np.linspace(plot_range[0], plot_range[1], 500)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.axvspan(
+        measurement_range[0],
+        measurement_range[1],
+        color="gray",
+        alpha=0.2,
+        label=f"measurement window ({measurement_range[0]}–{measurement_range[1]} min)",
+    )
+
+    for i, gamma in enumerate(gammas):
+        color = colors[i % len(colors)]
+        label = labels[i] if labels is not None else f"γ = {np.round(gamma, round_digits)} rad/s"
+        ax.plot(t, decay(t, gamma), color=color, label=label, linewidth=2)
+
+    ax.axhline(
+        threshold_pct,
+        color="gray",
+        linestyle="--",
+        alpha=0.7,
+        label=f"steady-state threshold (transient = {threshold_pct:.0f}%)",
+    )
+
+    ax.set_xlim(plot_range)
+    ax.set_ylim(0, 100)
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+    ax.set_xlabel("time (min)")
+    ax.set_ylabel("transient amplitude (% of initial value)")
+    ax.set_title(title if title is not None else "Transient amplitude decay")
+    ax.grid(axis="y", linestyle="--", alpha=0.3)
+    ax.legend()
+    plt.tight_layout()
 
 
 def bar_chart(data: tuple[list[str], list[float], list[float]], title: str = None) -> None:
