@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import find_peaks
 
+
 class EnvelopeData:
     """
     Data structure for storing envelope peak information for each pendulum time series.

@@ -6,6 +6,23 @@ from .pendulums_data import PendulumsData
 from .envelope_data import EnvelopeData
 from .constants import Constants
 
+
+def resonance_norm(omega_d, omega_i, omega_i_max_A, gamma: float) -> np.ndarray:
+    """
+    Calculate the normalized amplitude of a driven damped oscillator at a given natural frequency.
+    Args:
+        omega_d: Natural frequency of the driver pendulum.
+        omega_i: Natural frequency of the pendulum being evaluated.
+        omega_i_max_A: Natural frequency of the pendulum with the maximum amplitude.
+        gamma: Damping coefficient of the system.
+    Returns:
+        The normalized amplitude A/A_max for the given natural frequency omega_i.
+    """
+    numerator = (omega_i_max_A**2 - omega_d**2) ** 2 + (gamma * omega_d) ** 2
+    denominator = (omega_i**2 - omega_d**2) ** 2 + (gamma * omega_d) ** 2
+    return np.sqrt(numerator / denominator)
+
+
 class ResonanceFitData:
     """
     Data structure for performing resonance curve fitting and analysis.
@@ -48,11 +65,13 @@ class ResonanceFitData:
             The average gamma value calculated from the individual pendulum fits.
         """
         if not self.single_pendulum_gamma:
-            raise ValueError("No single pendulum gamma values found. Please run fit_single_pendulums() first.")
-        
+            raise ValueError(
+                "No single pendulum gamma values found. Please run fit_single_pendulums() first."
+            )
+
         gammas = [gamma for gamma, _ in self.single_pendulum_gamma.values()]
         return float(np.mean(gammas))
-    
+
     def get_data_to_plot(self) -> tuple[list[str], list[float], list[float]]:
         data_to_plot = ([], [], [])
 
@@ -60,8 +79,8 @@ class ResonanceFitData:
             gamma, gamma_err = self.single_pendulum_gamma[col]
             data_to_plot[0].append(col)
             data_to_plot[1].append(gamma)
-            data_to_plot[2].append(gamma_err)   
-        
+            data_to_plot[2].append(gamma_err)
+
         return data_to_plot
 
     def fit_single_pendulums(self) -> tuple[float, float]:

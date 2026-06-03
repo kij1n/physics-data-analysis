@@ -3,6 +3,7 @@ import pandas as pd
 from dataclasses import dataclass
 from scipy.signal import detrend
 
+
 @dataclass
 class PendulumsData:
     """

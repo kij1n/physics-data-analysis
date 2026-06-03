@@ -1,24 +1,10 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 from pathlib import Path
 from .pendulums_data import PendulumsData
 from .constants import Constants
-
-def resonance_norm(omega_d, omega_i, omega_i_max_A, gamma: float) -> np.ndarray:
-    """
-    Calculate the normalized amplitude of a driven damped oscillator at a given natural frequency.
-    Args:
-        omega_d: Natural frequency of the driver pendulum.
-        omega_i: Natural frequency of the pendulum being evaluated.
-        omega_i_max_A: Natural frequency of the pendulum with the maximum amplitude.
-        gamma: Damping coefficient of the system.
-    Returns:
-        The normalized amplitude A/A_max for the given natural frequency omega_i.
-    """
-    numerator = (omega_i_max_A**2 - omega_d**2) ** 2 + (gamma * omega_d) ** 2
-    denominator = (omega_i**2 - omega_d**2) ** 2 + (gamma * omega_d) ** 2
-    return np.sqrt(numerator / denominator)
 
 
 def plot_all(
@@ -64,7 +50,11 @@ def plot_all(
     plt.legend()
 
 
-def plot_each(p_data: PendulumsData, title: str = None, t_range: tuple[int | float, int | float] | None = None) -> None:
+def plot_each(
+    p_data: PendulumsData,
+    title: str = None,
+    t_range: tuple[int | float, int | float] | None = None,
+) -> None:
     """
     Plot the time series data for each pendulum in separate subplots, sharing the same x and y axes.
     Args:
@@ -124,7 +114,7 @@ def save_plot(filename: str, dpi: int = 300) -> None:
         dpi: The resolution in dots per inch for the saved plot. Default is 300.
     """
     path = Path(filename)
-    figure_dir = Path("../figures")
+    figure_dir = Path("../../figures")
     dir = path.parent
 
     if not os.path.exists(figure_dir / dir):
@@ -190,7 +180,11 @@ def plot_transient_decay(
 
     for i, gamma in enumerate(gammas):
         color = colors[i % len(colors)]
-        label = labels[i] if labels is not None else f"γ = {np.round(gamma, round_digits)} rad/s"
+        label = (
+            labels[i]
+            if labels is not None
+            else f"γ = {np.round(gamma, round_digits)} rad/s"
+        )
         ax.plot(t, decay(t, gamma), color=color, label=label, linewidth=2)
 
     ax.axhline(
@@ -212,7 +206,9 @@ def plot_transient_decay(
     plt.tight_layout()
 
 
-def bar_chart(data: tuple[list[str], list[float], list[float]], title: str = None) -> None:
+def bar_chart(
+    data: tuple[list[str], list[float], list[float]], title: str = None
+) -> None:
     """
     Create a bar chart with error bars from the provided data.
     Args:
@@ -220,28 +216,38 @@ def bar_chart(data: tuple[list[str], list[float], list[float]], title: str = Non
         title: Optional title for the plot. If None, a default title will be used.
     """
     labels, values, errors = data
-    
-    fig, ax = plt.subplots(figsize=(8,6))
 
-    bars = ax.bar(labels, values, yerr=errors, capsize=6, 
-              color='#4C72B0', edgecolor='black', alpha=0.8)
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    bars = ax.bar(
+        labels,
+        values,
+        yerr=errors,
+        capsize=6,
+        color="#4C72B0",
+        edgecolor="black",
+        alpha=0.8,
+    )
 
     for i, bar in enumerate(bars):
         height = bar.get_height()
         error = errors[i]
-        
+
         ax.text(
-            bar.get_x() + bar.get_width() / 2, height + error + 0.0005, 
-            f'{height:.4f}', 
-            ha='center', va='bottom', fontsize=10
+            bar.get_x() + bar.get_width() / 2,
+            height + error + 0.0005,
+            f"{height:.4f}",
+            ha="center",
+            va="bottom",
+            fontsize=10,
         )
 
-    ax.set_ylabel('Gamma Value')
-    ax.set_title('Baseline Gamma Values by Mass' if title is None else title)
+    ax.set_ylabel("Gamma Value")
+    ax.set_title("Baseline Gamma Values by Mass" if title is None else title)
 
     ax.set_ylim(0, max(values) + max(errors) + 0.005)
 
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.grid(axis="y", linestyle="--", alpha=0.7)
     plt.tight_layout()
 
 
@@ -274,24 +280,34 @@ def bar_charts(
         labels, values, errors = data
         ax = axd[key]
 
-        bars = ax.bar(labels, values, yerr=errors, capsize=6,
-                      color='#4C72B0', edgecolor='black', alpha=0.8)
+        bars = ax.bar(
+            labels,
+            values,
+            yerr=errors,
+            capsize=6,
+            color="#4C72B0",
+            edgecolor="black",
+            alpha=0.8,
+        )
 
         for j, bar in enumerate(bars):
             height = bar.get_height()
             ax.text(
-                bar.get_x() + bar.get_width() / 2, height + errors[j] + 0.0005,
-                f'{height:.4f}',
-                ha='center', va='bottom', fontsize=10,
+                bar.get_x() + bar.get_width() / 2,
+                height + errors[j] + 0.0005,
+                f"{height:.4f}",
+                ha="center",
+                va="bottom",
+                fontsize=10,
             )
 
         if i % cols == 0:
-            ax.set_ylabel('Gamma Value')
+            ax.set_ylabel("Gamma Value")
         else:
             ax.tick_params(labelleft=False)
 
         ax.set_ylim(0, max(values) + max(errors) + 0.005)
-        ax.grid(axis='y', linestyle='--', alpha=0.7)
+        ax.grid(axis="y", linestyle="--", alpha=0.7)
 
         if titles is not None:
             ax.set_title(titles[i])
