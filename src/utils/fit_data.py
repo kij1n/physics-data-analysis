@@ -1,5 +1,7 @@
 import numpy as np
+import pandas as pd
 from scipy.optimize import curve_fit
+from scipy.fft import rfft, rfftfreq
 import matplotlib.pyplot as plt
 from .pendulums_data import PendulumsData
 from .envelope_data import EnvelopeData
@@ -41,6 +43,7 @@ class ResonanceFitData:
     def __init__(self, L_d: float, p_data: PendulumsData):
         self.L_d: float = L_d
         self.L: np.ndarray = p_data.lengths
+        self.p_data: PendulumsData = p_data
 
         self.envelope_data: EnvelopeData = EnvelopeData(
             p_data.cols, p_data.labels, p_data.data
@@ -56,6 +59,9 @@ class ResonanceFitData:
         self.gamma_err: float | None = None
 
         self.single_pendulum_gamma: dict[str, tuple[float, float]] = {}
+        self.fft_results: dict[
+            str, tuple[np.ndarray[float], np.ndarray[complex], np.ndarray[float]]
+        ] = {}
 
     def get_single_gamma_avg(self) -> float:
         """
@@ -82,7 +88,19 @@ class ResonanceFitData:
 
         return data_to_plot
 
-def fit_single_pendulums(self) -> None: 
+    def perform_fft(self) -> None:
+        df: pd.DataFrame = self.p_data.data
+        T: float = df["t"].diff().mean()
+        N: len = len(df)
+
+        movement_data = df[self.p_data.cols].to_numpy()
+        xf = rfftfreq(N, T)
+
+        for i, col in enumerate(self.p_data.cols):
+            yf_single = rfft(movement_data[:, i])
+            self.fft_results[col] = (xf, yf_single, (2.0 / N) * np.abs(yf_single))
+
+    def fit_single_pendulums(self) -> None:
         """
         Fit the decay of the envelope peaks for each individual pendulum to extract the damping coefficient.
         The values are stored in the instance variable `single_pendulum_gamma` as a dictionary mapping column names to tuples of (gamma, gamma_err).

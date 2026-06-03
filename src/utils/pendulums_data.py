@@ -49,3 +49,7 @@ class PendulumsData:
     def detrend(self):
         for col in self.cols:
             self.data[col] = detrend(self.data[col], type="linear")
+
+    def normalize(self):
+        for col in self.cols:
+            self.data[col] /= self.data[col].abs().max()

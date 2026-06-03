@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
@@ -309,4 +308,68 @@ def bar_charts(
         if titles is not None:
             ax.set_title(titles[i])
 
+    plt.tight_layout()
+
+
+def plot_fft_results_all(
+    fft_results: dict[
+        str, tuple[np.ndarray[float], np.ndarray[complex], np.ndarray[float]]
+    ],
+    freq_range: tuple[float, float] = (0.43, 0.55),
+) -> None:
+    """
+    Plot the FFT results for each pendulum in separate subplots.
+    Args:
+        fft_results: A dictionary mapping column names to tuples of (frequencies, FFT values, magnitudes).
+    """
+
+    for i, (xf, _, mag) in enumerate(fft_results.values()):
+        plt.plot(
+            xf,
+            mag,
+            color=Constants.COLORS[i % len(Constants.COLORS)],
+            label=f"Pendulum {i + 1}",
+            alpha=0.8,
+        )
+
+    plt.xlabel("Frequency (Hz)")
+    plt.ylabel("Magnitude")
+    plt.title("FFT Magnitude vs Frequency")
+    plt.legend()
+    plt.xlim(*freq_range)  # Limit x-axis to focus on relevant frequencies
+    plt.grid()
+    plt.tight_layout()
+
+def plot_fft_results_each(
+    fft_results: dict[
+        str, tuple[np.ndarray[float], np.ndarray[complex], np.ndarray[float]]
+    ],
+    freq_range: tuple[float, float] = (0.43, 0.55),
+) -> None:
+    """
+    Plot the FFT results for each pendulum in separate subplots.
+    Args:
+        fft_results: A dictionary mapping column names to tuples of (frequencies, FFT values, magnitudes).
+    """
+    fig, axd = plt.subplot_mosaic([["A", "B"], ["C", "D"]], sharex=True, sharey=True)
+
+    for i, (col, (xf, _, mag)) in enumerate(fft_results.items()):
+        key = col[-1]
+        axd[key].plot(
+            xf,
+            mag,
+            color=Constants.COLORS[i % len(Constants.COLORS)],
+            label=f"Pendulum {key}",
+            alpha=0.8,
+        )
+        axd[key].set_title(f"Pendulum {key}")
+        axd[key].set_xlim(*freq_range)  # Limit x-axis to focus on relevant frequencies
+        axd[key].grid()
+
+    axd["C"].set_xlabel("Frequency (Hz)")
+    axd["D"].set_xlabel("Frequency (Hz)")
+    axd["A"].set_ylabel("Magnitude")
+    axd["C"].set_ylabel("Magnitude")
+
+    plt.suptitle("FFT Magnitude vs Frequency for Each Pendulum")
     plt.tight_layout()

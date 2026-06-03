@@ -10,6 +10,8 @@ from .plotting import (
     plot_transient_decay,
     bar_chart,
     bar_charts,
+    plot_fft_results_all,
+    plot_fft_results_each,
 )
 
 __all__ = [
@@ -24,4 +26,6 @@ __all__ = [
     "plot_transient_decay",
     "bar_chart",
     "bar_charts",
+    "plot_fft_results_all",
+    "plot_fft_results_each",
 ]
