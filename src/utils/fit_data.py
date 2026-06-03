@@ -82,7 +82,7 @@ class ResonanceFitData:
 
         return data_to_plot
 
-    def fit_single_pendulums(self) -> tuple[float, float]:
+def fit_single_pendulums(self) -> None: 
         """
         Fit the decay of the envelope peaks for each individual pendulum to extract the damping coefficient.
         The values are stored in the instance variable `single_pendulum_gamma` as a dictionary mapping column names to tuples of (gamma, gamma_err).
