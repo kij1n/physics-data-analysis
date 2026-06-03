@@ -114,14 +114,11 @@ def save_plot(filename: str, dpi: int = 300) -> None:
         dpi: The resolution in dots per inch for the saved plot. Default is 300.
     """
     path = Path(filename)
-    figure_dir = Path("../figures")
-    dir = path.parent
+    figures_dir = Path(__file__).resolve().parents[2] / "figures"
+    target_path = figures_dir / path
 
-    if not os.path.exists(figure_dir / dir):
-        os.makedirs(figure_dir / dir)
-
-    filename = os.path.join(figure_dir, filename)
-    plt.savefig(filename, dpi=dpi, bbox_inches="tight")
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(target_path, dpi=dpi, bbox_inches="tight")
 
 
 def plot_transient_decay(
