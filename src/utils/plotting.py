@@ -114,7 +114,7 @@ def save_plot(filename: str, dpi: int = 300) -> None:
         dpi: The resolution in dots per inch for the saved plot. Default is 300.
     """
     path = Path(filename)
-    figure_dir = Path("../../figures")
+    figure_dir = Path("../figures")
     dir = path.parent
 
     if not os.path.exists(figure_dir / dir):

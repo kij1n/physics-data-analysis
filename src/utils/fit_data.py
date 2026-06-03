@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from .pendulums_data import PendulumsData

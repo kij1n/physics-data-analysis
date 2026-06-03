@@ -1,5 +1,5 @@
 [project]
-name = "python-data-analysis"
+name = "utils"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
@@ -15,3 +15,7 @@ dependencies = [
 dev = [
     "ruff>=0.15.12",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
