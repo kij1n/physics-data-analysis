@@ -6,3 +6,4 @@ python-*.egg-info/
 *.local*
 figures/
 .claude/
+.ipynb_checkpoints/
