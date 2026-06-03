@@ -145,7 +145,7 @@ def fit_single_pendulums(self) -> None:
             title: Optional title for the plot. If not provided, a default title will be used.
         """
         col_names = ["A", "B", "C", "D"]
-        fix, axd = plt.subplot_mosaic(
+        fig, axd = plt.subplot_mosaic(
             [col_names[0:2], col_names[2:4]], sharex=True, sharey=True
         )
 
