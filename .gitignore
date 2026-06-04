@@ -7,3 +7,4 @@ python-*.egg-info/
 figures/
 .claude/
 .ipynb_checkpoints/
+.ruff_cache/

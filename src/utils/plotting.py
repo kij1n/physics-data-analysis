@@ -316,6 +316,8 @@ def plot_fft_results_all(
         str, tuple[np.ndarray[float], np.ndarray[complex], np.ndarray[float]]
     ],
     freq_range: tuple[float, float] = (0.43, 0.55),
+    title: str | None = None,
+    labels: list[str] | None = None,
 ) -> None:
     """
     Plot the FFT results for each pendulum in separate subplots.
@@ -328,23 +330,26 @@ def plot_fft_results_all(
             xf,
             mag,
             color=Constants.COLORS[i % len(Constants.COLORS)],
-            label=f"Pendulum {i + 1}",
+            label=labels[i] if labels is not None else f"Pendulum {i + 1}",
             alpha=0.8,
         )
 
     plt.xlabel("Frequency (Hz)")
     plt.ylabel("Magnitude")
-    plt.title("FFT Magnitude vs Frequency")
+    plt.title(title if title is not None else "FFT Magnitude vs Frequency")
     plt.legend()
     plt.xlim(*freq_range)  # Limit x-axis to focus on relevant frequencies
     plt.grid()
     plt.tight_layout()
+
 
 def plot_fft_results_each(
     fft_results: dict[
         str, tuple[np.ndarray[float], np.ndarray[complex], np.ndarray[float]]
     ],
     freq_range: tuple[float, float] = (0.43, 0.55),
+    title: str | None = None,
+    labels: list[str] | None = None,
 ) -> None:
     """
     Plot the FFT results for each pendulum in separate subplots.
@@ -359,10 +364,10 @@ def plot_fft_results_each(
             xf,
             mag,
             color=Constants.COLORS[i % len(Constants.COLORS)],
-            label=f"Pendulum {key}",
+            label=labels[i] if labels is not None else f"Pendulum {key}",
             alpha=0.8,
         )
-        axd[key].set_title(f"Pendulum {key}")
+        axd[key].set_title(labels[i] if labels is not None else f"Pendulum {key}")
         axd[key].set_xlim(*freq_range)  # Limit x-axis to focus on relevant frequencies
         axd[key].grid()
 
@@ -371,5 +376,7 @@ def plot_fft_results_each(
     axd["A"].set_ylabel("Magnitude")
     axd["C"].set_ylabel("Magnitude")
 
-    plt.suptitle("FFT Magnitude vs Frequency for Each Pendulum")
+    plt.suptitle(
+        title if title is not None else "FFT Magnitude vs Frequency for Each Pendulum"
+    )
     plt.tight_layout()
