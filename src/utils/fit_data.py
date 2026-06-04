@@ -90,7 +90,8 @@ class ResonanceFitData:
 
     def perform_fft(self) -> None:
         df: pd.DataFrame = self.p_data.data
-        T: float = df["t"].diff().mean()
+        # T: float = df["t"].diff().mean()
+        T: float = 0.100
         N: len = len(df)
 
         movement_data = df[self.p_data.cols].to_numpy()
