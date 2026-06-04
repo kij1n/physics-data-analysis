@@ -4,6 +4,13 @@ from dataclasses import dataclass
 from scipy.signal import detrend
 
 
+def prepare_data(path: str, cols: list[str]) -> pd.DataFrame:
+    df = pd.read_csv(path)
+    df = df.dropna(subset=cols, how="all")
+    df = df.interpolate(method="linear")
+    return df
+
+
 @dataclass
 class PendulumsData:
     """
