@@ -241,7 +241,7 @@ def bar_chart(
     ax.set_ylabel("Gamma Value")
     ax.set_title("Baseline Gamma Values by Mass" if title is None else title)
 
-    ax.set_ylim(0, max(values) + max(errors) + 0.005)
+    ax.set_ylim(0, max(values) + 0.005)
 
     ax.grid(axis="y", linestyle="--", alpha=0.7)
     plt.tight_layout()

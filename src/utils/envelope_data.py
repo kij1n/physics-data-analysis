@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.signal import find_peaks
+from scipy.ndimage import uniform_filter1d
 
 
 class EnvelopeData:
@@ -38,7 +39,8 @@ class EnvelopeData:
         signal: np.ndarray,
         env_distance_s: float = 25.0,
         min_height_frac: float = 0.3,
-        prominence_frac: float = 0.15,
+        prominence_frac: float = 0.05,
+        detrend_window_s: float = 75.0,
     ) -> tuple[float, np.ndarray, np.ndarray]:
         """
         Calculate the mean amplitude of the envelope peaks for a given signal.
@@ -47,7 +49,8 @@ class EnvelopeData:
             signal: The signal array for which to calculate the envelope peaks.
             env_distance_s: Minimum time distance between detected peaks in seconds.
             min_height_frac: Minimum height of peaks as a fraction of the maximum absolute signal value.
-            prominence_frac: Minimum prominence of peaks as a fraction of the maximum absolute signal value.
+            prominence_frac: Minimum prominence of peaks (on the detrended envelope) as a fraction of the maximum absolute signal value.
+            detrend_window_s: Width, in seconds, of the moving-average baseline removed from the swing-amplitude envelope before peak detection. Should span roughly one beat period or more.
         Returns:
             A tuple containing:
             - The mean amplitude of the detected envelope peaks.
@@ -64,14 +67,31 @@ class EnvelopeData:
             swing_idx, _ = find_peaks(s)
             if len(swing_idx) < 2:
                 return np.array([], dtype=int)
+            swing_env = s[swing_idx]
             swing_dt = np.median(np.diff(t[swing_idx]))
             distance_samples = max(1, int(round(env_distance_s / swing_dt)))
+
+            # The swing-amplitude envelope can ride on a slow trend (e.g. the
+            # exponential decay of a freely-swinging pendulum). scipy measures
+            # prominence against that trend, so on a decaying envelope every
+            # beat except the global maximum collapses to a near-zero
+            # prominence and gets discarded. Subtracting a slow moving-average
+            # baseline leaves the beat modulation on a flat zero line, so
+            # prominence reflects the beat depth itself.
+            window = max(3, int(round(detrend_window_s / swing_dt)))
+            baseline = uniform_filter1d(swing_env, size=window, mode="nearest")
+            detrended = swing_env - baseline
+
             env_idx_in_swing, _ = find_peaks(
-                s[swing_idx],
+                detrended,
                 distance=distance_samples,
-                height=height_threshold,
                 prominence=prominence_threshold,
             )
+            # Keep the absolute-amplitude gate on the original envelope so that
+            # low-amplitude beats are still rejected after detrending.
+            env_idx_in_swing = env_idx_in_swing[
+                swing_env[env_idx_in_swing] >= height_threshold
+            ]
             return swing_idx[env_idx_in_swing]
 
         top_idx = _envelope_indices(signal)
