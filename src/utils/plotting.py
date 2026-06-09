@@ -298,7 +298,7 @@ def bar_charts(
             )
 
         if i % cols == 0:
-            ax.set_ylabel("Gamma Value")
+            ax.set_ylabel("Gamma Value (rad/s)")
         else:
             ax.tick_params(labelleft=False)
 
