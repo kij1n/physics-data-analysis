@@ -80,9 +80,9 @@ class ResonanceFitData:
     def get_data_to_plot(self) -> tuple[list[str], list[float], list[float]]:
         data_to_plot = ([], [], [])
 
-        for col in self.envelope_data.cols:
+        for col, label in zip(self.envelope_data.cols, self.envelope_data.labels):
             gamma, gamma_err = self.single_pendulum_gamma[col]
-            data_to_plot[0].append(col)
+            data_to_plot[0].append(label)
             data_to_plot[1].append(gamma)
             data_to_plot[2].append(gamma_err)
 

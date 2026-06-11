@@ -238,7 +238,7 @@ def bar_chart(
             fontsize=10,
         )
 
-    ax.set_ylabel("Gamma Value")
+    ax.set_ylabel("Gamma Value (rad/s)")
     ax.set_title("Baseline Gamma Values by Mass" if title is None else title)
 
     ax.set_ylim(0, max(values) + 0.005)
